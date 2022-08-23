@@ -1,0 +1,7 @@
+services:
+  ethereum-account-generator:
+    image: bap2pecs/ethereum-account-generator
+    container_name: ethereum-account-generator
+    tty: true
+    restart: always
+    env_file: .env
