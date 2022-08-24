@@ -16,10 +16,12 @@ Generate ethereum accounts that matches the specified regex pattern.
 
 ## How to use the image
 - first create an `.env` file by copying the content from `.env.example` and replacing the values
+  - run `wget https://raw.githubusercontent.com/bap2pecs/ethereum-account-generator/main/.env.example -O .env`
 - to do a quick test, run `docker run -it --rm --env-file=.env bap2pecs/ethereum-account-generator` 
 - using `docker-compose`:
   - download `docker-compose.yml` to the same directory where you created the `.env` file
-  - run `docker-compose up -d` to start searching
+    - run `wget https://raw.githubusercontent.com/bap2pecs/ethereum-account-generator/main/docker-compose.yml`
+    - run `docker-compose up -d` to start searching
   - run `docker-compose logs -f` to see the search result
   - run `docker-compose stop` to stop searching
     - then run `docker-compose logs | grep "to continue"` to find out where the search is stopped at
