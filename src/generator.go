@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"runtime"
 	"strconv"
+	"sync"
 	"syscall"
 
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
@@ -108,9 +109,14 @@ func main() {
 	}
 
 	// searching for addresses staring with many zeros
+	var wg sync.WaitGroup
 	for i := startPos; i < startPos+thread; i++ {
-		go mineHDAccount(wallet, i, thread, &tracker[i%thread])
+		wg.Add(1)
+		i := i
+		go func() {
+			defer wg.Done()
+			mineHDAccount(wallet, i, thread, &tracker[i%thread])
+		}()
 	}
-	var input string
-	fmt.Scanln(&input)
+	wg.Wait()
 }
