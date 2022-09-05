@@ -14,8 +14,8 @@ import (
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 )
 
-func generateHDAccount(wallet *hdwallet.Wallet, pos int) (address, key string) {
-	path := hdwallet.MustParseDerivationPath(fmt.Sprintf("m/44'/60'/0'/0/%d", pos))
+func generateHDAccount(wallet *hdwallet.Wallet, index uint32) (address, key string) {
+	path := hdwallet.MustParseDerivationPath(fmt.Sprintf("m/44'/60'/0'/0/%d", index))
 	account, err := wallet.Derive(path, false)
 	if err != nil {
 		log.Fatal(err)
@@ -29,8 +29,8 @@ func generateHDAccount(wallet *hdwallet.Wallet, pos int) (address, key string) {
 	return account.Address.Hex(), privateKey
 }
 
-func printAccount(pos int, address, key string) {
-	fmt.Printf("%d: %s %s\n", pos, address, key)
+func printAccount(index uint32, address, key string) {
+	fmt.Printf("%d: %s %s\n", index, address, key)
 }
 
 var searchPattern = os.Getenv("SEARCH_PATTERN")
@@ -43,8 +43,8 @@ func isAllLeadingZeroAddress(address string) bool {
 	return match
 }
 
-func mineHDAccount(wallet *hdwallet.Wallet, startPos int, step int, trackerSlot *int) {
-	for i := startPos; true; i += step {
+func mineHDAccount(wallet *hdwallet.Wallet, startIndex uint32, step int, trackerSlot *uint32) {
+	for i := startIndex; true; i += uint32(step) {
 		address, key := generateHDAccount(wallet, i)
 		if isAllLeadingZeroAddress((address)) {
 			printAccount(i, address, key)
@@ -53,7 +53,7 @@ func mineHDAccount(wallet *hdwallet.Wallet, startPos int, step int, trackerSlot 
 	}
 }
 
-func minInSlice(values []int) int {
+func minInSlice(values []uint32) uint32 {
 	min := values[0]
 	for _, v := range values {
 		if v < min {
@@ -63,12 +63,12 @@ func minInSlice(values []int) int {
 	return min
 }
 
-func registerOnExit(tracker []int) {
+func registerOnExit(tracker []uint32) {
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Println("\nLatest searched positions (in each slot):")
+		fmt.Println("\nLatest searched index (in each slot):")
 		for _, slot := range tracker {
 			fmt.Println(slot)
 		}
@@ -81,23 +81,23 @@ func parseMnemonic() string {
 	return os.Getenv("MNEMONIC")
 }
 
-func parseStartPos() int {
-	startPos, err := strconv.Atoi(os.Getenv("START_POS"))
+func parseStartIndex() uint32 {
+	startIndex, err := strconv.ParseUint(os.Getenv("START_INDEX"), 10, 32)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return startPos
+	return uint32(startIndex)
 }
 
 func main() {
 	// parse arguments from ENV variables
 	mnemonic := parseMnemonic()
-	startPos := parseStartPos()
+	startIndex := parseStartIndex()
 
 	// schedule the number of go routines to be equal to the number of available
 	// CPU cores
 	thread := runtime.GOMAXPROCS(0)
-	tracker := make([]int, thread)
+	tracker := make([]uint32, thread)
 
 	// print some useful info on exit
 	registerOnExit(tracker)
@@ -110,12 +110,12 @@ func main() {
 
 	// searching for addresses staring with many zeros
 	var wg sync.WaitGroup
-	for i := startPos; i < startPos+thread; i++ {
+	for i := startIndex; i < startIndex+uint32(thread); i++ {
 		wg.Add(1)
 		i := i
 		go func() {
 			defer wg.Done()
-			mineHDAccount(wallet, i, thread, &tracker[i%thread])
+			mineHDAccount(wallet, i, thread, &tracker[i%uint32(thread)])
 		}()
 	}
 	wg.Wait()
