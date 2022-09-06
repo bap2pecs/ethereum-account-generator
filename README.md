@@ -8,7 +8,7 @@ Generate ethereum accounts that matches the specified regex pattern.
 
 - prerequisite: 
   - run `docker buildx create --use`
-- run `docker buildx build --platform linux/amd64,linux/arm64 -t bap2pecs/ethereum-account-generator . ` within this repo to build images for different architecture
+- run `docker buildx build --platform linux/amd64,linux/arm64 -t bap2pecs/ethereum-account-generator -t bap2pecs/ethereum-account-generator:{VERSION TAG} .` within this repo to build images for different architecture
   - add option `--push` to push images into registry
 - to push to docker hub (private repo):
   - `docker login`
