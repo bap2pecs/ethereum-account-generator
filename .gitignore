@@ -1,3 +1,6 @@
 .env
-.devcontainer
 bin/
+
+# vscode related
+.devcontainer
+.vscode

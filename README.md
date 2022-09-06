@@ -25,7 +25,7 @@ Generate ethereum accounts that matches the specified regex pattern.
   - run `docker-compose logs -f` to see the search result
   - run `docker-compose stop` to stop searching
     - then run `docker-compose logs | grep "to continue"` to find out where the search is stopped at
-    - then replace the value of `START_POS` in `.env` with the grepped number
+    - then replace the value of `START_ACCOUNT` and `START_INDEX` in `.env` with the grepped values
     - then restart searching with `docker-compose up -d`
 
 ## How to test from src file
